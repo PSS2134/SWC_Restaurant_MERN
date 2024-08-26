@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Avatar } from "primereact/avatar";
 import user from "./Images/userImg.png";
 import cart_icon from "./Images/Menu/icons8-cart-48.png";
-
+import dish from './Images/dish.png';
 function Navbar({ updateUser, inside }) {
   const Logout = () => {
     localStorage.removeItem("user");
@@ -23,7 +23,7 @@ function Navbar({ updateUser, inside }) {
   return (
     <div className="navbar">
       <div className="left">
-        <span class="material-symbols-rounded">menu</span>
+        <img src = {dish} style = {{height : '50px', width:'50px', margin:'5px 0px 5px 15px' }}/>
         <div className="logo"> Taste Heaven</div>
       </div>
       <ul className="right">

@@ -25,7 +25,7 @@ function Footer() {
           </div>
 
           <div className="footericons">
-            <a href="https://www.instagram.com/priyansh_s_s/">
+            <a href="https://www.instagram.com/priyanssh_02/">
               <img className="footer-icons" src={Insta} />
             </a>
             <a href="https://twitter.com/Priyans22040544">

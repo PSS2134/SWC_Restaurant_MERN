@@ -8,7 +8,8 @@ import Footer from "./Footer";
 import Spinner from "./Spinner";
 import db from "./data";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
 //Images
 import edit from "./Images/edit.png";
 import user from "./Images/userImg.png";
@@ -248,70 +249,47 @@ function Profile({ updateUser }) {
               className="profile-order-box"
               style={{ backgroundColor: "#f5f5f5", padding: "2% 0" }}
             >
-              <div
-                style={{
-                  height: "90vh",
-                  overflowY: "scroll",
-                  backgroundColor: "#f5f5f5",
-                }}
-              >
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Id</th>
-                      <th>Order Items</th>
-                      <th>Date</th>
-                      <th>Time</th>
-                      <th>Amount</th>
-                      <th>Address</th>
-                      {/* <th>Action</th> */}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order &&
-                      order.toReversed().map((SingleOrder) => {
-                        return (
-                          <tr>
-                            <td>{SingleOrder.orderid}</td>
-                            {/* <td>{singleOrder.food}</td> */}
-                            <td>
-                              {SingleOrder.foods?.length > 0 &&
-                                SingleOrder.foods.map((singleFood) => {
+             <div className="card">
+            <DataTable value={order.toReversed()} paginator rows={5} rowsPerPageOptions={[5, 10, 25, 50]} tableStyle={{ minWidth: '50rem' }}>
+                <Column field="orderid" header="OrderID" style={{ width: '15%' }}></Column>
+                <Column field="food" header="Order Items" body = {(singleOrder) => {
+
+                  return (singleOrder.foods?.length > 0 &&
+                                singleOrder.foods.map((singleFood) => {
+                                  console.log(singleFood);
                                   return (
                                     <b>
-                                      <span style={{ padding: "20px 10px" }}>
+                                      <span style={{ padding: "20px 10px" , width : 'max-content'}}>
                                         {singleFood.quantity} x{" "}
                                         {db[singleFood?.foodId - 1]?.title},
                                       </span>
                                     </b>
                                   );
-                                })}
-                            </td>
-                            <td>{SingleOrder.date}</td>
-                            <td>{SingleOrder.time}</td>
-                            <td>Rs {SingleOrder.totalPrice}</td>
-                            <td>
-                              <div style={{ width: "25vw", border: "none" }}>
+                                }))}} style={{width : "30%"}}></Column>
+                <Column field="date" header="Date" style={{ width: '20%' }}></Column>
+                <Column field="time" header="Time" style={{ width: '20%' }}></Column>
+                <Column field="amount" body = {(singleOrder) => {return singleOrder.totalPrice.toLocaleString('en-US', {style : 'currency', currency : 'INR'})} } header="Amount" style={{ width: '25%' }}></Column>
+                <Column field="address" header="Address" body = {(singleOrder) => {
+                  return (
+                    <div style={{ border: "none" }}>
                                 <p style={{ padding: "10px 10px" }}>
-                                  {SingleOrder?.address?.contact}
+                                  {singleOrder?.address?.contact}
                                 </p>
                                 <p style={{ padding: "10px 10px" }}>
-                                  {SingleOrder?.address?.flatno}
+                                  {singleOrder?.address?.flatno}
                                 </p>
                                 <p style={{ padding: "10px 10px" }}>
-                                  {SingleOrder?.address?.address}
+                                  {singleOrder?.address?.address}
                                 </p>
                                 <p style={{ padding: "10px 10px" }}>
-                                  {SingleOrder?.address?.landmark}
+                                  {singleOrder?.address?.landmark}
                                 </p>
                               </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
+                  )
+                }} style={{ width: '25%' }}></Column>
+
+            </DataTable>
+        </div>
             </div>
           </div>
           <Footer />

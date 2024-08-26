@@ -34,65 +34,36 @@
     background-color: #f6f5f9; 
     width:100%;
 }
-.list-header{
-    display: flex;
-    justify-content: center;
-    background-color: #f6f5f9;
-}
-.list-head-elements{
-    display: flex;
-    /* justify-content: space-around; */
-    align-items: center;
-    font-size: 30px;
-    font-family: "Montserrat", "Helvetica Neue";
-    color: white;
-    background-color:rgba(15, 15, 247, 0.591) ;
-    margin: 6px;
-    width: 85%;
-    border-radius: 10px;
-   
-}
-.list-head-elements>li{
-    list-style: none;
-    
-}
-.list1{
-    border-right: 2px solid black;
-    height: 100%;
-    width: 20%;
-    text-align: center;
 
-}
-.list2{
-    border-right: 2px solid black;
-    height: 100%;
-    width: 30%;
-    text-align: center;
-    height: 100%;
-
-}
-.list3{
-    border-right: 2px solid black;
-    height: 100%;
-    width: 20%;
-    text-align: center;
-
-}
-.list4{
-    border-right: 2px solid black;
-    height: 100%;
-    width: 15%;
-    text-align: center;
-
-}
-.list5{
-    height: 100%;
-    text-align: center;
-    width: 15%;
-}
 .cart-items{
     height: 85vh;
     overflow-y:scroll;
+}
+.listrow-img{
+    width: 30%;
+    height: 30%;
+    border-radius: 10px;
+    box-shadow: 3px 3px 3px black;
+    border-right: 2px solid black;
+  
+}
+.cart-quantity-flexbox{
+    display: flex;
+    align-items: center;
+}
+.cart-quantity-btn{
+    font-size: 1.5rem;
+    padding: 7px;
+    margin: 0 15px;
+    background-color: rgba(244, 238, 238, 0.968);
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+
+
+}
+.cart-quantity-btn:hover{
+    background-color: rgba(247, 245, 245, 0.968);
 }
 .cart-totalprice{
     text-align: center;

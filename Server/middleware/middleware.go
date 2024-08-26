@@ -370,6 +370,11 @@ func PostOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("Order Inserted Successfully")
+	_ , err = cartCollection.DeleteMany(context.Background(), primitive.M{"email": email})
+	if err != nil { 
+		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error deleting cart", Data: err})
+		log.Fatal("Error deleting cart", err)
+	}
 	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Order Inserted successfully", Data: nil})
 }
 
@@ -650,7 +655,6 @@ func insertOneUser(user *models.User) {
 	fmt.Println(insertRes.InsertedID)
 	fmt.Println("User Inserted successfully: ", insertRes)
 }
-
 
 // func Errfunc(err error, msg string, status int) {
 // 	if err != nil {
