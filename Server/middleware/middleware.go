@@ -8,7 +8,10 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	db "github.com/PSS2134/go_restapi/DB"
 	"github.com/PSS2134/go_restapi/models"
+	invoice "github.com/PSS2134/go_restapi/utils/Invoice"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,7 +19,6 @@ import (
 )
 
 var userCollection *mongo.Collection
-var addressCollection *mongo.Collection
 var cartCollection *mongo.Collection
 var orderCollection *mongo.Collection
 
@@ -32,8 +34,7 @@ func createDBInstance() {
 	connectionURI := os.Getenv("MONGO_URI")
 	dbName := os.Getenv("DB_NAME")
 	userCollName := os.Getenv("USER_COLLNAME")
-	addressCollName := os.Getenv("ADDRESS_COLLNAME")
-    cartCollName := os.Getenv("CART_COLLNAME")
+	cartCollName := os.Getenv("CART_COLLNAME")
 	orderCollName := os.Getenv("ORDER_COLLNAME")
 	//each time we talk to database we need to provide context, agar konsa context dena hai ye nahi pta toh context.TODO() dedo, else api me read write ke waqt context.Background() dena accha hai
 
@@ -57,7 +58,6 @@ func createDBInstance() {
 	fmt.Println("Connected to MongoDB Successfully :) ")
 
 	userCollection = client.Database(dbName).Collection(userCollName)
-	addressCollection = client.Database(dbName).Collection(addressCollName)
 	cartCollection = client.Database(dbName).Collection(cartCollName)
 	orderCollection = client.Database(dbName).Collection(orderCollName)
 	fmt.Println("Collection instance created")
@@ -92,7 +92,7 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//API SIGNUP
+// API SIGNUP
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Inside SignUp")
 	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
@@ -104,53 +104,62 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&user)
 
 	//id := user.ID
-	if user.Email == "" || user.Password == "" || user.Name == "" {
-         res := models.Response{Status: 400, Message: "All fields are required", Data: nil}
-		 //encode me & ki jarurat nahi lekin decode me & ki jarurat hai as sahi cheez decode honi chahiye copy nahi.....:)
-		 json.NewEncoder(w).Encode(&res)
-		 return
+	if user.Email == "" || user.Password == "" || user.Name == "" || user.Phone == 0 {
+		res := models.Response{Status: 400, Message: "All fields are required", Data: nil}
+		//encode me & ki jarurat nahi lekin decode me & ki jarurat hai as sahi cheez decode honi chahiye copy nahi.....:)
+		json.NewEncoder(w).Encode(&res)
+		return
 	}
 	var userExists models.User
-	fmt.Println("user Email", user.Email);
+	var sendUser models.User
+	fmt.Printf("user : %+v", user)
 	err := userCollection.FindOne(context.Background(), primitive.M{"email": user.Email}).Decode(&userExists)
-    if err != nil {
+	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			fmt.Println("No user found")
 			insertRes, err := userCollection.InsertOne(context.Background(), user)
 			if err != nil {
-				log.Fatal("Some error inserting user" , err)
+				log.Fatal("Some error inserting user", err)
 			}
+
 			user.ID = insertRes.InsertedID.(primitive.ObjectID)
-	        json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "User Inserted Successfully", Data: user})
+			sendUser = user
+			sendUser.Password = ""
+			sendUser.Addresses = nil
+			json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "User Inserted Successfully", Data: sendUser})
 			r.Body.Close()
 			return
 		} else {
-			log.Fatal("Some error quering user" , err)
+			log.Fatal("Some error quering user", err)
 		}
 	}
 	fmt.Println("userExists: ", userExists)
+	sendUser = userExists
 
 	//IMP DONT SEND PASSWORD TO FRONTEND
+	sendUser.Password = ""
+	sendUser.Addresses = nil
 	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "User Already Exists", Data: userExists})
 }
 
-//API Login Controller
+// API Login Controller
 func Login(w http.ResponseWriter, r *http.Request) {
- 
+
 	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Acess-Control-Allow-Origin", "*")
 	w.Header().Set("Acess-Control-Allow-Methods", "POST")
 
 	defer r.Body.Close()
-	var user models.User
+	var user, sendUser models.User
+
 	json.NewDecoder(r.Body).Decode(&user)
-    fmt.Println(user);
-	if user.Email == "" || user.Password == "" { 
+	fmt.Println(user)
+	if user.Email == "" || user.Password == "" {
 		fmt.Println("Email or Password can not be empty")
 		json.NewEncoder(w).Encode(&models.Response{
-			Status: 400,
+			Status:  400,
 			Message: "Email or Password can not be empty",
-			Data: nil,
+			Data:    nil,
 		})
 		return
 	}
@@ -163,103 +172,163 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		if err == mongo.ErrNoDocuments {
 			fmt.Println("User not found, Please SignUp...")
 			json.NewEncoder(w).Encode(&models.Response{
-				Status: 400,
+				Status:  400,
 				Message: "User not found",
-				Data: nil,
+				Data:    nil,
 			})
 			return
 		} else {
-			log.Fatal("Some error quering user" , err)
+			log.Fatal("Some error quering user", err)
 		}
 	}
 
-	if userExists.Password != user.Password { 
+	if userExists.Password != user.Password {
 		fmt.Println("Invalid Password")
 		json.NewEncoder(w).Encode(&models.Response{
-			Status: 400,
+			Status:  400,
 			Message: "Invalid Password",
-			Data: nil,
+			Data:    nil,
 		})
 		return
 	}
 
-    
 	//IMP DONT SEND PASSWORD TO FRONTEND
+	sendUser = userExists
+	sendUser.Password = ""
+	sendUser.Addresses = nil
 	json.NewEncoder(w).Encode(&models.Response{
-		Status: 200,
+		Status:  200,
 		Message: "Login Successful",
-		Data: userExists,
+		Data:    sendUser,
 	})
 
 }
 
-//API - POST Address
+// API - POST Address
 func PostAddress(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
-	w.Header().Set("Acess-Control-Allow-Origin", "*")
-	w.Header().Set("Acess-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	defer r.Body.Close()
+
 	qparams := r.URL.Query()
 	email := qparams.Get("email")
-
-	_ , err := addressCollection.DeleteMany(context.Background(), primitive.M{"email": email})
-
-	if err != nil { 
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error deleting address", Data: err})
-		log.Fatal("Error deleting address", err)
+	fmt.Println("email", email)
+	var address models.UserAddress
+	err := json.NewDecoder(r.Body).Decode(&address)
+	if err != nil {
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error decoding user address", Data: err})
+		log.Fatal("Error decoding user address", err)
 		return
 	}
-    
-    var userAddress models.Location
-	err = json.NewDecoder(r.Body).Decode(&userAddress)
-	if err != nil {
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error decoding user address", Data: err})
-		log.Fatal("Error decoding user address", err)
-		
+	fmt.Printf("Incoming Address: %+v\n", address)
+
+	var user models.User
+
+	err = userCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&user)
+	if err != nil && err != mongo.ErrNoDocuments {
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error finding user", Data: err})
+		log.Fatal("Error finding user", err)
+		return
 	}
-	fmt.Println("User Address: ", userAddress)
-	userAddress.Email = email
-	_ , err = addressCollection.InsertOne(context.Background(), userAddress)
-	
-	if err != nil {
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error inserting address", Data: err})
-		log.Fatal("Error inserting address", err)
+
+	if len(user.Addresses) > 0 {
+
+		_, err = userCollection.UpdateOne(context.Background(), primitive.M{"email": email}, primitive.M{
+			"$push": primitive.M{"addresses": address},
+		})
+	} else {
+		fmt.Print("HI")
+		user.Addresses = []models.UserAddress{address}
+		fmt.Printf("User : %+v", user)
+		_, err = userCollection.ReplaceOne(context.Background(), primitive.M{"email": email}, user)
 	}
-	json.NewEncoder(w).Encode(&models.Response{ Status: 200, Message: "Address Inserted Successfully", Data: userAddress})
-	//fmt.Print("All success at POSTAddress")
+
+	if err != nil {
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error updating address", Data: err})
+		log.Fatal("Error updating address", err)
+		return
+	}
+
+	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Address Saved Successfully", Data: address})
 }
 
-//API - GET Address
-func GetAddress(w http.ResponseWriter, r *http.Request){
-    
+// //PI - POST Address
+// func PostAddress(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+// 	w.Header().Set("Acess-Control-Allow-Origin", "*")
+// 	w.Header().Set("Acess-Control-Allow-Methods", "POST")
+// 	defer r.Body.Close()
+// 	qparams := r.URL.Query()
+// 	email := qparams.Get("email")
+
+// 	_ , err := addressCollection.DeleteMany(context.Background(), primitive.M{"email": email})
+
+// 	if err != nil {
+// 		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error deleting address", Data: err})
+// 		log.Fatal("Error deleting address", err)
+// 		return
+// 	}
+
+//     var userAddress models.Location
+// 	err = json.NewDecoder(r.Body).Decode(&userAddress)
+// 	if err != nil {
+// 		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error decoding user address", Data: err})
+// 		log.Fatal("Error decoding user address", err)
+
+// 	}
+// 	fmt.Println("User Address: ", userAddress)
+// 	userAddress.Email = email
+// 	_ , err = addressCollection.InsertOne(context.Background(), userAddress)
+
+// 	if err != nil {
+// 		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error inserting address", Data: err})
+// 		log.Fatal("Error inserting address", err)
+// 	}
+// 	json.NewEncoder(w).Encode(&models.Response{ Status: 200, Message: "Address Inserted Successfully", Data: userAddress})
+// 	//fmt.Print("All success at POSTAddress")
+// }
+
+// API - GET ALL ADDRESSES
+func GetAllAddresses(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Acess-Control-Allow-Origin", "*")
 	w.Header().Set("Acess-Control-Allow-Methods", "GET")
-    defer r.Body.Close()
+	defer r.Body.Close()
+
+	email := r.URL.Query().Get("email")
+	var user models.User
+	err := userCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&user)
+	if err != nil {
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching user", Data: err})
+		log.Fatal("Error fetching user", err)
+		return
+	}
+	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "User Addresses Fetched Successfully", Data: user.Addresses})
+
+}
+
+// API - GET Confirmation
+func GetConfirmation(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Acess-Control-Allow-Origin", "*")
+	w.Header().Set("Acess-Control-Allow-Methods", "GET")
+	defer r.Body.Close()
 	email := r.URL.Query().Get("email")
 	//TODO: Check if email is empty
-    
+
 	//IMP user, address, cart?
 
 	var user models.User
-	var address models.Location
 	var cart models.Cart
 
 	err := userCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&user)
 
 	if err != nil {
-		
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error fetching user", Data: err})
-		log.Fatal("Error fetching user", err)
-		return
-	}
-    
-	err = addressCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&address)
 
-	if err != nil {
-		
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error fetching user address", Data: err})
-		log.Fatal("Error fetching user address", err)
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching user", Data: err})
+		log.Fatal("Error fetching user", err)
 		return
 	}
 
@@ -267,20 +336,18 @@ func GetAddress(w http.ResponseWriter, r *http.Request){
 
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error fetching user cart", Data: err})
-		log.Fatal("Error fetching user cart", err)
-		return
+			json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching user cart", Data: err})
+			log.Fatal("Error fetching user cart", err)
+			return
 		}
-		
+
 	}
 
-	json.NewEncoder(w).Encode(&models.Response{ Status: 200, Message: "User Data", Data: map[string]interface{}{"name": user.Name, "address": address, "food": cart.Foods, "totalPrice" : cart.TotalPrice}})
-	fmt.Println("All success at GETAddress")
+	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Confirmation Data", Data: map[string]interface{}{"name": user.Name, "food": cart.Foods, "totalPrice": cart.TotalPrice}})
+	fmt.Println("All success at GETConfirmation")
 }
 
-
-
-//API - GET ORDER
+// API - GET ORDER
 func GetOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Acess-Control-Allow-Origin", "*")
@@ -289,17 +356,17 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	orderId := r.URL.Query().Get("orderId")
 	var order models.Order
-	err := orderCollection.FindOne(context.Background(), primitive.M{"email": email, "orderid" : orderId}).Decode(&order)
+	err := orderCollection.FindOne(context.Background(), primitive.M{"email": email, "orderid": orderId}).Decode(&order)
 
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
-			json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error fetching order", Data: err})
+			json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching order", Data: err})
 			log.Fatal("Error fetching order", err)
 			return
 		}
 	}
-    fmt.Println("Order Fetched Successfully")
-	json.NewEncoder(w).Encode(&models.Response{ Status: 200, Message: "Order Data", Data: order})
+	fmt.Println("Order Fetched Successfully")
+	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Order Data", Data: order})
 }
 
 //API POST Order
@@ -313,20 +380,13 @@ func PostOrder(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	orderId := r.URL.Query().Get("orderId")
 
-
+	var address models.UserAddress
+	json.NewDecoder(r.Body).Decode(&address)
 	var cart models.Cart
 	err := cartCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&cart)
 	if err != nil && err != mongo.ErrNoDocuments {
 		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching cart", Data: err})
 		log.Fatal("Error fetching cart", err)
-		return
-	}
-
-	var address models.Location
-	err = addressCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&address)
-	if err != nil && err != mongo.ErrNoDocuments {
-		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching address", Data: err})
-		log.Fatal("Error fetching address", err)
 		return
 	}
 
@@ -362,6 +422,22 @@ func PostOrder(w http.ResponseWriter, r *http.Request) {
 	order.Date = date
 	order.Time = time
 
+
+	var argItems []models.LineItems
+	for _, val := range order.Foods {
+		argItems = append(argItems, models.LineItems{Item: db.MenuItems[val.FoodID-1].Title, Price: val.Price, Total: val.Price * val.Quantity, Quantity: val.Quantity})
+	}
+	var payload models.PDFGenData
+	payload.Date = date
+	payload.Time = time
+	payload.Customer = address
+	payload.Email = email
+	payload.LineItems = argItems
+	payload.InvoiceTotal =  order.TotalPrice
+	payload.InvoiceNumber = orderId
+	invoiceUrl := invoice.GetInvoice(payload)
+	//Now update invoice url
+	order.InvoiceURL = invoiceUrl
 	_, err = orderCollection.InsertOne(context.Background(), order)
 	if err != nil {
 		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error inserting order", Data: err})
@@ -370,15 +446,16 @@ func PostOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("Order Inserted Successfully")
-	_ , err = cartCollection.DeleteMany(context.Background(), primitive.M{"email": email})
-	if err != nil { 
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error deleting cart", Data: err})
+	_, err = cartCollection.DeleteMany(context.Background(), primitive.M{"email": email})
+	if err != nil {
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error deleting cart", Data: err})
 		log.Fatal("Error deleting cart", err)
 	}
+	
 	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Order Inserted successfully", Data: nil})
 }
 
-//API GET PROFILE 
+//API GET PROFILE
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 
@@ -389,31 +466,29 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	cur, err := orderCollection.Find(context.Background(), primitive.M{"email": email})
 	if err != nil {
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error fetching orders for user", Data: err})
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching orders for user", Data: err})
 		log.Fatal(err)
 	}
-    var orderSlice []models.Order
+	var orderSlice []models.Order
 	for cur.Next(context.Background()) {
-       
+
 		var single models.Order
 		err := cur.Decode(&single)
 		if err != nil {
-			json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error fetching orders for user", Data: err})
+			json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching orders for user", Data: err})
 			log.Fatal(err)
 		}
 		orderSlice = append(orderSlice, single)
 
 	}
 
-	
 	message := fmt.Sprintf("All Orders Fetched successfully for User: %s", email)
 	json.NewEncoder(w).Encode(&models.Response{
-    Status:  200,
-    Message: message,
-    Data:    orderSlice,
+		Status:  200,
+		Message: message,
+		Data:    orderSlice,
 	})
-    fmt.Println(message)
-
+	fmt.Println(message)
 
 }
 
@@ -429,26 +504,27 @@ func PostProfile(w http.ResponseWriter, r *http.Request) {
 	var userExists models.User
 	err := userCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&userExists)
 	if err != nil && err != mongo.ErrNoDocuments {
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error fetching user", Data: err})
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching user", Data: err})
 		log.Fatal("Error fetching user", err)
 		return
 	}
 	var userReq models.User
 	json.NewDecoder(r.Body).Decode(&userReq)
+	fmt.Println(userReq.Phone)
 	userExists.Name = userReq.Name
 	userExists.Phone = userReq.Phone
-	_ , err = userCollection.ReplaceOne(context.Background(), primitive.M{"email": email}, userExists)
+	_, err = userCollection.ReplaceOne(context.Background(), primitive.M{"email": email}, userExists)
 	if err != nil {
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error updating user", Data: err})
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error updating user", Data: err})
 		log.Fatal("Error updating user", err)
 		return
 	}
 
 	fmt.Println("User Profile Updated Successfully")
-	json.NewEncoder(w).Encode(&models.Response{ Status: 200, Message: "User Profile Updated Successfully", Data: userExists})
+	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "User Profile Updated Successfully", Data: userExists})
 }
 
-//API - PUT FOR IMAGE CHANGE
+// API - PUT FOR IMAGE CHANGE
 func UpdateIMG(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("IMAGE CHANGE")
 	w.Header().Set("Content-Type", "application/json")
@@ -457,25 +533,25 @@ func UpdateIMG(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	email := r.URL.Query().Get("email")
-	var custom struct{
+	var custom struct {
 		URL string `json:"url"`
 	}
 	json.NewDecoder(r.Body).Decode(&custom)
 	fmt.Println("URL: ", custom.URL)
-    result, err := userCollection.UpdateOne(context.Background(), primitive.M{"email": email}, primitive.M{"$set": primitive.M{"url": custom.URL}})
+	result, err := userCollection.UpdateOne(context.Background(), primitive.M{"email": email}, primitive.M{"$set": primitive.M{"url": custom.URL}})
 
 	if err != nil {
-		json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error updating image", Data: err})
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error updating image", Data: err})
 		log.Fatal("Error updating image", err)
 		return
 	}
 
 	fmt.Println("Image Updated Successfully: ", result)
-	json.NewEncoder(w).Encode(&models.Response{ Status: 200, Message: "Image Updated Successfully", Data: nil})
+	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Image Updated Successfully", Data: nil})
 
 }
 
-//API CART
+// API CART
 func PostCart(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -488,8 +564,8 @@ func PostCart(w http.ResponseWriter, r *http.Request) {
 	var userCart models.Cart
 	json.NewDecoder(r.Body).Decode(&foodQuantity)
 	//fmt.Println(foodQuantity)
-    if foodQuantity.Quantity == 0 || foodQuantity.Price == 0 {
-        json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Invalid food quantity or price", Data: nil})
+	if foodQuantity.Quantity == 0 || foodQuantity.Price == 0 {
+		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Invalid food quantity or price", Data: nil})
 		return
 	}
 	err := cartCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&userCart)
@@ -544,7 +620,7 @@ func PostCart(w http.ResponseWriter, r *http.Request) {
 					// Update the item's quantity
 					userCart.Foods[i].Quantity = newQuantity
 				}
-	
+
 				// Update the total price
 				userCart.TotalPrice -= foodQuantity.Price * foodQuantity.Quantity
 				if userCart.TotalPrice < 0 {
@@ -553,19 +629,19 @@ func PostCart(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 		}
-	
+
 		// If the item was not found, respond with an error
 		if !found {
 			json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Item not found in cart", Data: nil})
 			return
 		}
-	
+
 	default:
 		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Invalid action", Data: nil})
 		return
 	}
 
-	_ , err = cartCollection.UpdateOne(context.Background(), primitive.M{"email": email}, primitive.M{"$set": userCart})
+	_, err = cartCollection.UpdateOne(context.Background(), primitive.M{"email": email}, primitive.M{"$set": userCart})
 	if err != nil {
 		json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error updating cart", Data: err})
 		log.Fatal("Error updating cart", err)
@@ -588,16 +664,16 @@ func GetCart(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 
 		if err == mongo.ErrNoDocuments {
-			json.NewEncoder(w).Encode(&models.Response{ Status: 200, Message: "Cart not found", Data: nil})
+			json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Cart not found", Data: nil})
 			return
 		} else {
-			json.NewEncoder(w).Encode(&models.Response{ Status: 400, Message: "Error fetching cart", Data: err})
+			json.NewEncoder(w).Encode(&models.Response{Status: 400, Message: "Error fetching cart", Data: err})
 			log.Fatal("Error fetching cart", err)
 			return
 		}
 
 	}
-	json.NewEncoder(w).Encode(&models.Response{ Status: 200, Message: "Cart fetched Successfully", Data: userCart})
+	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Cart fetched Successfully", Data: userCart})
 
 }
 

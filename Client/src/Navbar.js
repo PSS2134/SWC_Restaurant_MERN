@@ -24,7 +24,7 @@ function Navbar({ updateUser, inside }) {
     <div className="navbar">
       <div className="left">
         <img src = {dish} style = {{height : '50px', width:'50px', margin:'5px 0px 5px 15px' }}/>
-        <div className="logo"> Taste Heaven</div>
+        <a href="/"> <div className="logo"> Taste Heaven</div></a> 
       </div>
       <ul className="right">
         <li>
@@ -93,7 +93,7 @@ function Navbar({ updateUser, inside }) {
               </a>
             </li>
             <li>
-              <a href="/profile">
+              <a href="/user">
                 <Avatar
                   image={!userData?.url ? user : userData.url}
                   className="mr-2"
@@ -109,11 +109,6 @@ function Navbar({ updateUser, inside }) {
             </li>
           </>
         )}
-        {userData?.email && <li>
-          <button className="Menu-Logout-button" onClick={Logout}>
-            Logout
-          </button>
-          </li>}
       </ul>
     </div>
   );

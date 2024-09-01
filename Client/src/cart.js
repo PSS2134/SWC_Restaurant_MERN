@@ -14,21 +14,18 @@ import db from "./data";
 //spinner
 import Spinner from "./Spinner";
 import Navbar from "./Navbar";
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { useNavigate } from "react-router-dom";
+import { Button } from "primereact/button";
 const datanew = [];
 function Cart({ updateUser }) {
   const [isLoading, setIsLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
   const [data, setData] = useState([]);
-  const Logout = () => {
-    localStorage.removeItem("user");
-    const user = localStorage.getItem("user");
-    toast.success("Thanks for Visiting Menu");
-    updateUser(user);
-  };
+  const [userAdress, setUserAddress] = useState();
   const { email, name } = JSON.parse(localStorage.getItem("user"));
-
+  const navigate = useNavigate();
   useEffect(() => {
     fetch(`http://localhost:8000/api/cart?email=${email}`)
       .then((res) => {
@@ -41,39 +38,51 @@ function Cart({ updateUser }) {
         setTotalPrice(resNew?.data?.totalPrice);
       })
       .catch((err) => console.log(err));
+      setUserAddress(JSON.parse(localStorage.getItem('address')));
   }, []);
+  
   const imageBodyTemplate = (product) => {
-    return <img src={`${db[product.foodId - 1].url}`} alt={product.image} className="listrow-img" />;
-};
+    return (
+      <img
+        src={`${db[product.foodId - 1].url}`}
+        alt={product.image}
+        className="listrow-img"
+      />
+    );
+  };
 
   const ActionBtn = async (action, id) => {
-      try {
-        const res = await fetch(`http://localhost:8000/api/cart?email=${email}&action=${action}`, {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/cart?email=${email}&action=${action}`,
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            foodId : id, 
-            quantity : 1,
-            price : Number(db[id - 1].price)
-
+            foodId: id,
+            quantity: 1,
+            price: Number(db[id - 1].price),
           }),
-        });
-        const resnew = await res.json();
-        console.log("add", resnew);
-        if (resnew.status == 200 && resnew.message == "Cart Updated successfully") {
-          action == "add" ? toast.success(
-            `1 more ${db[id - 1].title} added to your cart`
-          ) : toast.success(`1 ${db[id - 1].title} removed from your cart`);
-          setData(resnew.data?.foods);
-          setTotalPrice(resnew.data?.totalPrice);
-        } else {
-          toast.error(resnew.message);
         }
-      } catch (err) {
-        toast.error(err);
-        throw new Error(err);
+      );
+      const resnew = await res.json();
+      console.log("add", resnew);
+      if (
+        resnew.status == 200 &&
+        resnew.message == "Cart Updated successfully"
+      ) {
+        action == "add"
+          ? toast.success(`1 more ${db[id - 1].title} added to your cart`)
+          : toast.success(`1 ${db[id - 1].title} removed from your cart`);
+        setData(resnew.data?.foods);
+        setTotalPrice(resnew.data?.totalPrice);
+      } else {
+        toast.error(resnew.message);
       }
-    
+    } catch (err) {
+      toast.error(err);
+      throw new Error(err);
+    }
   };
 
   // {data && data.map((singleFood)=>{
@@ -140,54 +149,93 @@ function Cart({ updateUser }) {
               <img className="cart-img" src={cart} />
             </div>
             <div className="card">
-            <DataTable value={data} tableStyle={{ maxWidth: '90%' }}>
+              <DataTable value={data} tableStyle={{ maxWidth: "90%" }}>
                 <Column field="foodId" header="ID"></Column>
                 {/* <Column field="item" header="Item" body = {(prod) => {return <img src = {db[prod?.foodId - 1].url} className="listrow-img"/>}}></Column> */}
                 <Column header="Item" body={imageBodyTemplate}></Column>
-                <Column field="name" header="Name" body = {(prod) => {return db[prod?.foodId - 1].title}}></Column>
-                <Column field="quantity" header="Quantity"
-                body = {(prod) => {
-                  return (
-                    <div className="cart-quantity-flexbox">
-                      <button
-                        className="cart-quantity-btn"
-                        onClick={() => ActionBtn("remove", prod.foodId)}
-                      >
-                        -
-                      </button>
-                      <p className="cart-quantity">{prod.quantity}</p>
-                      <button
-                        className="cart-quantity-btn"
-                        onClick={() => ActionBtn("add", prod.foodId)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  );
-                }}
-                >
-                
-                  </Column>
-                <Column field="price" header="Price" body = {(prod) => {return Number(db[prod?.foodId - 1].price).toLocaleString('en-US', { style: 'currency', currency: 'INR' })}}></Column>
+                <Column
+                  field="name"
+                  header="Name"
+                  body={(prod) => {
+                    return db[prod?.foodId - 1].title;
+                  }}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="Quantity"
+                  body={(prod) => {
+                    return (
+                      <div className="cart-quantity-flexbox">
+                        <button
+                          className="cart-quantity-btn"
+                          onClick={() => ActionBtn("remove", prod.foodId)}
+                        >
+                          -
+                        </button>
+                        <p className="cart-quantity">{prod.quantity}</p>
+                        <button
+                          className="cart-quantity-btn"
+                          onClick={() => ActionBtn("add", prod.foodId)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    );
+                  }}
+                ></Column>
+                <Column
+                  field="price"
+                  header="Price"
+                  body={(prod) => {
+                    return Number(db[prod?.foodId - 1].price).toLocaleString(
+                      "en-US",
+                      { style: "currency", currency: "INR" }
+                    );
+                  }}
+                ></Column>
 
-                <Column field="total" header="Total" body = {(prod) => {return (Number(db[prod?.foodId - 1].price) * prod.quantity).toLocaleString('en-US', { style: 'currency', currency: 'INR' })}}></Column>
-                
+                <Column
+                  field="total"
+                  header="Total"
+                  body={(prod) => {
+                    return (
+                      Number(db[prod?.foodId - 1].price) * prod.quantity
+                    ).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "INR",
+                    });
+                  }}
+                ></Column>
+
                 {/* <Column field="category" header="Category"></Column>
                 <Column field="quantity" header="Quantity"></Column> */}
-            </DataTable>
-         </div>
-            
-              <div className="cart-totalprice-box-parent">
-                <div className="cart-totalprice-box">
-                  <p className="cart-totalprice">
-                    Total Amount : ₹ {totalPrice}
-                  </p>
+              </DataTable>
+              <div className="cart-totalprice-box">
+                <p className="cart-totalprice">Total Amount : ₹ {totalPrice}</p>
+              </div>
+            </div>
+
+            <div className="cart-totalprice-box-parent">
+           
+              <div className="user-address-tag-card" style={{width : 'fit-content', margin:'2vh auto'}}>
+                <p style={{textAlign:'center', fontSize :'1.5rem'}}><b>Address</b></p>
+                <div className="user-address-card">
+                  <div className="order-card-address">
+                    <p className="address-card-address-text">
+                      {userAdress?.address}
+                    </p>
+                    <p className="address-card-address-text">
+                      {userAdress?.landmark}
+                    </p>
+                    <p className="address-card-address-text">
+                      {userAdress?.pin}
+                    </p>
+                  </div>
                 </div>
               </div>
-            <p className="cart-address-header">
-              Fill the Address & Proceed to checkout
-            </p>
-            <Address data={data} />
+             
+              <Button onClick={() =>{navigate('/menu/cart/confirm')}} className ="checkout-btn" type='submit' label="Checkout" severity="help"></Button>
+            </div>
             <Footer />
           </>
         )}

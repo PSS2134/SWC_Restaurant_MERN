@@ -3,7 +3,9 @@
     padding: 0;
    
 } */
-
+a{
+    text-decoration: none;
+}
   @import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital@1&family=Montserrat&family=Poppins:wght@300;400;500;600;700;800&family=Sacramento&display=swap');
 
 .navbar{

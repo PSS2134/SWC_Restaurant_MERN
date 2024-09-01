@@ -8,10 +8,12 @@ import Landingpage from "./Landingpage";
 import Signup from "./Signup";
 import Login from "./Login";
 import Menu from "./Menu";
-import Cart from "./cart";
+import Cart from "./Cart";
 import Confirmation from "./Confirmation";
 import Orderplaced from "./Orderplaced";
 import Profile from "./userProfile";
+import User from "./User";
+
 
 function Routesnew() {
   const [user, setUser] = useState({});
@@ -26,23 +28,20 @@ function Routesnew() {
     localStorage.setItem("user", JSON.stringify(user));
     // console.log(user);
   };
-  
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Landingpage updateUser = {updateUser} />} />
+        <Route path="/" element={<Landingpage updateUser={updateUser} />} />
         <Route path="/signup" element={<Signup />} />
-        <Route
-          path="/login"
-          element={<Login updateUser={updateUser} />}
-        />
+        <Route path="/login" element={<Login updateUser={updateUser} />} />
         <Route
           path="/menu"
           element={
             user && user.email ? (
               <Menu updateUser={updateUser} />
             ) : (
-              <Landingpage  updateUser={updateUser} />
+              <Landingpage updateUser={updateUser} />
             )
           }
         />{" "}
@@ -52,26 +51,41 @@ function Routesnew() {
             user && user.email ? (
               <Cart updateUser={updateUser} />
             ) : (
-              <Landingpage  updateUser={updateUser}/>
+              <Landingpage updateUser={updateUser} />
             )
           }
         />
-        <Route path="*" element={<Landingpage  updateUser={updateUser}/>} />
-        <Route path="/menu/cart/confirm" element={ user && user.email ? (
+        <Route
+          path="/menu/cart/confirm"
+          element={
+            user && user.email ? (
               <Confirmation updateUser={updateUser} />
             ) : (
-              <Landingpage  updateUser={updateUser}/>
-            )}/>
-        <Route path="/menu/cart/confirm/orderplaced" element={user && user.email ?(<Orderplaced updateUser={updateUser} />
+              <Landingpage updateUser={updateUser} />
+            )
+          }
+        />
+        <Route
+          path="/menu/cart/confirm/orderplaced"
+          element={
+            user && user.email ? (
+              <Orderplaced updateUser={updateUser} />
             ) : (
-              <Landingpage  updateUser={updateUser}/>
-            )}/>
-             <Route path="/profile" element={user && user.email ?(<Profile updateUser={updateUser} />
+              <Landingpage updateUser={updateUser} />
+            )
+          }
+        />
+        <Route
+          path="/user"
+          element={
+            user && user.email ? (
+              <User updateUser={updateUser} />
             ) : (
-              <Landingpage  updateUser={updateUser}/>
-            )}/>
-
-           <Route path="*" element={<Landingpage updateUser={updateUser}/>} />
+              <Landingpage updateUser={updateUser} />
+            )
+          }
+        />
+        <Route path="*" element={<Landingpage updateUser={updateUser} />} />
       </Routes>
     </BrowserRouter>
   );

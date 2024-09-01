@@ -71,7 +71,7 @@ function Address() {
     <input onChange={handleData} name="landmark" className='address-form-input'></input>
     
 </div>
-<button onClick={handleSubmit} className ="address-checkout-btn" type='submit'>Checkout</button>
+
 </form>
     </div></div>
   )

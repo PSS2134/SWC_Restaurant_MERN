@@ -1,6 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
+import "./AuthPage.css";
+import { Card } from "primereact/card";
+import { InputText } from "primereact/inputtext";
+import { InputNumber } from "primereact/inputnumber";
+import { Button } from "primereact/button";
+import { Message } from "primereact/message";
+import leftImg from "./Images/AuthImg.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -43,34 +50,54 @@ function SignIn({ updateUser }) {
   };
   return (
     <div>
-      <div className="body">
-        <div className="card">
-          <h1>Login</h1>
-          <form>
-            <p className="formlabel">Email</p>
-            <input
-              type="text"
-              className="forminput"
-              name="email"
-              onChange={loginData}
-            />
-            <p className="formlabel">Password</p>
-            <input
-              type="password"
-              className="forminput"
-              name="password"
-              onChange={loginData}
-            />
-            <button className="formbtn" onClick={Login}>
-              Submit
-            </button>
+      <div className="authpage-flexbox">
+        <div className="authpage-left">
+          <img src={leftImg} className="authpage-left-image" />
+        </div>
+        <div className="authpage-right">
+          <Card className="authpage-right-div">
+            <h1 className="auth-header">LogIn</h1>
+            <div className="auth-input-div">
+              <label htmlFor="username" className="auth-label">
+                Email
+              </label>
+              <InputText
+                id="username"
+                name="email"
+                onChange={loginData}
+                aria-describedby="username-help"
+                style={{ width: "100%" }}
+                value={userData?.email}
+                required
+              />
+            </div>
+
+            <div className="auth-input-div">
+              <label htmlFor="password" className="auth-label">
+                Password
+              </label>
+              <InputText
+                id="password"
+                onChange={loginData}
+                name="password"
+                aria-describedby="username-help"
+                style={{ width: "100%" }}
+                value={userData?.password}
+                required
+              />
+            </div>
+            <Button
+              label="Login"
+              onClick={Login}
+              severity="success"
+              className="auth-btn"
+            ></Button>
             <p className="formfoot">
-              Don't Have an Account? <a href="/signup">Please Signup</a>
+              Don't Have an Account? <a href="/signup">Please SignUp</a>
             </p>
-          </form>
+          </Card>
         </div>
       </div>
-      <ToastContainer position="top-center" />
     </div>
   );
 }

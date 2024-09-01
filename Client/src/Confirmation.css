@@ -59,12 +59,10 @@
     margin: 10px;
 }
 .confirmation-btn{
-    margin:  auto;
-    margin-top: -3%;
     display: block;
-    padding: 1%;
-    width: 15%;
-    text-align: center;
+    margin: auto;
+    padding: 2vh;
+    width: max-content;
     font-size: 20px;
     font-family: "Montserrat";
     background-color: rgb(5, 201, 5);
@@ -72,8 +70,8 @@
     border-radius: 10px;
     color: white;
     font-weight: 500;
-    box-shadow: 6px 6px 6px rgb(1, 82, 1);
-    margin-bottom: 5%;
+    box-shadow: 3px 3px 4px rgb(1, 82, 1);
+    cursor: pointer;
 
 }
 .confirmation-btn:active{

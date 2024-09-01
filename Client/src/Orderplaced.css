@@ -83,7 +83,6 @@
     display: block;
     margin: 0 auto;
     padding:2% 2%;
-    
     border-radius: 100%;
     border: none;
     font-family: "Montserrat";
@@ -92,6 +91,7 @@
     background-color: blue;
     color: white;
     box-shadow: 5px 5px 5px black;
+    cursor: pointer;
 }
 .orderplaced-btn:active{
     box-shadow: none;

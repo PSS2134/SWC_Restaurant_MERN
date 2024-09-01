@@ -3,7 +3,7 @@ import { Link } from "react-scroll";
 import { useNavigate } from "react-router-dom";
 import "./Confirmation.css";
 import Footer from "./Footer";
-import { food } from "./cart";
+import { food } from "./Cart";
 import Spinner from "./Spinner";
 import db from "./data";
 import { v4 as uuid } from "uuid";
@@ -23,25 +23,20 @@ const Confirmation = ({ updateUser }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [order, setOrder] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [address, setAddress] = useState({});
+  const [loaderText, setLoaderText] = useState("Confirm Your Order!");
   const order_id = uuid().slice(0, 8);
   // console.log(food);
-  const Logout = () => {
-    localStorage.removeItem("user");
-    const user = localStorage.getItem("user");
-    toast.success("Thanks for Visiting Menu");
-    updateUser(user);
-  };
-  const { email, name } = JSON.parse(localStorage.getItem("user"));
+  
+  const { email, name, phone } = JSON.parse(localStorage.getItem("user"));
+  const address = JSON.parse(localStorage.getItem("address"));
   useEffect(() => {
-    fetch(`http://localhost:8000/api/address?email=${email}`)
+    fetch(`http://localhost:8000/api/confirmation?email=${email}&`)
       .then((response) => response.json())
       .then((resNew) => {
         //console.log(resNew);
         setIsLoading(false);
         setOrder(resNew?.data?.food);
         setTotalPrice(resNew?.data?.totalPrice);
-        setAddress(resNew?.data?.address);
       });
   }, []);
 
@@ -50,6 +45,8 @@ const Confirmation = ({ updateUser }) => {
   const placeOrder = async () => {
     localStorage.setItem("order_id", JSON.stringify(order_id));
     console.log(order_id);
+    setLoaderText("Generating Invoice....")
+    setIsLoading(true);
     const res = await fetch(
       `http://localhost:8000/api/order?email=${email}&orderId=${order_id}`,
       {
@@ -57,10 +54,13 @@ const Confirmation = ({ updateUser }) => {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(address),
       }
     );
     const resnew = await res.json();
     if (resnew.status == 200 && resnew.message == "Order Inserted successfully") {
+      setIsLoading(false);
+      
       toast.success("Order Placed Successfully");
       navigate("/menu/cart/confirm/orderplaced");
       window.scrollTo(0, 0);
@@ -70,7 +70,7 @@ const Confirmation = ({ updateUser }) => {
   return (
     <>
       {isLoading ? (
-        <Spinner title="Confirm Your Order!" />
+        <Spinner title={loaderText} />
       ) : (
         <>
           {" "}
@@ -115,16 +115,16 @@ const Confirmation = ({ updateUser }) => {
                       </p>
                       <p className="confirmation-address-content">{name},</p>
                       <p className="confirmation-address-content">
-                        {address.contact}
+                        {phone}
                       </p>
                       <p className="confirmation-address-content">
-                        {address.flatno}
+                        {address?.address}
                       </p>
                       <p className="confirmation-address-content">
-                        {address.address}
+                        {address?.landmark}
                       </p>
                       <p className="confirmation-address-content">
-                        {address.landmark}
+                        {address?.pin}
                       </p>
                     </div>
                   </div>

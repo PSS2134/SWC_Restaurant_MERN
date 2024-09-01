@@ -3,24 +3,21 @@ import { Link } from "react-scroll";
 import "./Orderplaced.css";
 import Footer from "./Footer";
 import Spinner from "./Spinner";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import db from "./data";
 
 //Toastify
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-//Images
-import cart_icon from "./Images/Menu/icons8-cart-48.png";
-import user from "./Images/user.png";
 import Navbar from "./Navbar";
 
 function Orderplaced({updateUser}) {
   const [isLoading, setIsLoading] = useState(true);
   const [finalorder, setFinalOrder] = useState({});
-  const { name, email } = JSON.parse(localStorage.getItem("user"));
+  const { name, email, phone } = JSON.parse(localStorage.getItem("user"));
   const order_id = JSON.parse(localStorage.getItem("order_id"));
   console.log(order_id);
+  const navigate = useNavigate();
   useEffect(() => {
     fetch(`http://localhost:8000/api/order?email=${email}&orderId=${order_id}`)
       .then((response) => response.json())
@@ -90,16 +87,16 @@ function Orderplaced({updateUser}) {
                         <div className="orderplaced-address-box">
                           <p className="orderplaced-address-content">{name}</p>
                           <p className="orderplaced-address-content">
-                            {finalorder?.address?.contact}
-                          </p>
-                          <p className="orderplaced-address-content">
-                            {finalorder?.address?.flatno}
+                            {phone||"NA"}
                           </p>
                           <p className="orderplaced-address-content">
                             {finalorder?.address?.address}
                           </p>
                           <p className="orderplaced-address-content">
                             {finalorder?.address?.landmark}
+                          </p>
+                          <p className="orderplaced-address-content">
+                            {finalorder?.address?.pin}
                           </p>
                         </div>
                       </div>
@@ -113,11 +110,9 @@ function Orderplaced({updateUser}) {
             <p className="orderplaced-footer-content">
               Wanna Visit your Profile?
             </p>
-            <NavLink to="/profile">
-              <button className="orderplaced-btn" type="Submit">
+              <button className="orderplaced-btn" onClick={()=> navigate('/user')}>
                 Go
               </button>
-            </NavLink>
           </div>
           <Footer className="orderplaced-footer" />
         </>
