@@ -19,6 +19,8 @@ import (
 const url = "https://pdfgen.app/api/generate?templateId=b7fc783"
 
 //IMP Using PDFGen API to generate Invoice PDF and then uploading to Cloudinary then storing public url in DB
+
+//TODO : Delete invoice.pdf after saving url to DB
 func GetInvoice(payload models.PDFGenData) string {
 
 	apiKey := os.Getenv("PDFGEN_API_KEY")
