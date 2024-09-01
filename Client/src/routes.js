@@ -11,7 +11,6 @@ import Menu from "./Menu";
 import Cart from "./Cart";
 import Confirmation from "./Confirmation";
 import Orderplaced from "./Orderplaced";
-import Profile from "./userProfile";
 import User from "./User";
 
 

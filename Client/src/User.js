@@ -20,7 +20,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 //Images
 import edit from "./Images/edit.png";
 import user from "./Images/userImg.png";
-
 //Toastify
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -224,7 +223,8 @@ const User = ({ updateUser }) => {
 
     if (res.status == 200 && res.message == "Address Saved Successfully") {
       toast.success("Address Save Successfully");
-      setAddressRes((address => ([...address, res.data])))
+      if(address.length == 0) setAddress([res.data]);
+      else setAddressRes((address => ([...address, res.data])))
       setAddress({ address: "", landmark: "", pin: 0 });
       setVisible(false);
     }

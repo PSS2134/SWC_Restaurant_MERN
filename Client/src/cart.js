@@ -148,7 +148,7 @@ function Cart({ updateUser }) {
 
               <img className="cart-img" src={cart} />
             </div>
-            <div className="card">
+            <div className="card" style={{backgroundColor : "#f6f5f9"}}>
               <DataTable value={data} tableStyle={{ maxWidth: "90%" }}>
                 <Column field="foodId" header="ID"></Column>
                 {/* <Column field="item" header="Item" body = {(prod) => {return <img src = {db[prod?.foodId - 1].url} className="listrow-img"/>}}></Column> */}
@@ -217,7 +217,7 @@ function Cart({ updateUser }) {
 
             <div className="cart-totalprice-box-parent">
            
-              <div className="user-address-tag-card" style={{width : 'fit-content', margin:'2vh auto'}}>
+             {!userAdress?.address?<h2 style={{textAlign : 'center', margin:'6vh'}}>Please Add Address to Continue....</h2> : <div className="user-address-tag-card" style={{width : 'fit-content', margin:'2vh auto'}}>
                 <p style={{textAlign:'center', fontSize :'1.5rem'}}><b>Address</b></p>
                 <div className="user-address-card">
                   <div className="order-card-address">
@@ -232,9 +232,9 @@ function Cart({ updateUser }) {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div>}
              
-              <Button onClick={() =>{navigate('/menu/cart/confirm')}} className ="checkout-btn" type='submit' label="Checkout" severity="help"></Button>
+              <Button onClick={() =>{navigate('/menu/cart/confirm')}} className ="checkout-btn" type='submit' label="Checkout" severity="help" disabled = {!userAdress?.address}></Button>
             </div>
             <Footer />
           </>

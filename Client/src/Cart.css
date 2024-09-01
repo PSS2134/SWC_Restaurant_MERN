@@ -40,13 +40,18 @@
     overflow-y:scroll;
 }
 .listrow-img{
-    width: 30%;
-    height: 30%;
+    width: 25%;
+    height: 25%;
     border-radius: 10px;
     box-shadow: 3px 3px 3px black;
     border-right: 2px solid black;
   
 }
+
+th,td {
+    padding: 1rem 1rem;
+    width: 20%;
+  }
 .cart-quantity-flexbox{
     display: flex;
     align-items: center;
