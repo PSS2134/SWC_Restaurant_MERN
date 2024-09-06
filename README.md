@@ -23,7 +23,7 @@ Here're some of the project's best features:
 Technologies used in the project:
 
 *   ReactJs
-*   NodeJs
-*   ExpressJs
+*   Golang
+*   Gorilla Mux
 *   MongoDB
 *   Cloudinary
