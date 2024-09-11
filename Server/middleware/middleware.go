@@ -12,6 +12,7 @@ import (
 	db "github.com/PSS2134/go_restapi/DB"
 	"github.com/PSS2134/go_restapi/models"
 	invoice "github.com/PSS2134/go_restapi/utils/Invoice"
+	"github.com/PSS2134/go_restapi/utils/whatsapp"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -48,7 +49,7 @@ func createDBInstance() {
 		log.Fatal("Error initiating connection to DB", err)
 	}
 
-	//re assigning to above error variable
+	//re-assigning to above error variable
 	err = client.Ping(context.TODO(), nil) //Ping karke we are checking ki sab sahi toh chal rha hai na?
 
 	if err != nil {
@@ -127,6 +128,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 			sendUser.Password = ""
 			sendUser.Addresses = nil
 			json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "User Inserted Successfully", Data: sendUser})
+			//IMP : Whatsapp
+			whatsapp.SendInvitation(user.Phone)
 			r.Body.Close()
 			return
 		} else {
@@ -140,6 +143,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	sendUser.Password = ""
 	sendUser.Addresses = nil
 	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "User Already Exists", Data: userExists})
+	
 }
 
 // API Login Controller
@@ -453,6 +457,14 @@ func PostOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	json.NewEncoder(w).Encode(&models.Response{Status: 200, Message: "Order Inserted successfully", Data: nil})
+	//IMP : Whatsapp
+	var userWA models.User
+	err = userCollection.FindOne(context.Background(), primitive.M{"email": email}).Decode(&userWA)
+	if(err != nil) {
+		fmt.Println("Error fetching user for whatsapp", err)
+		return
+	}
+	whatsapp.SendOrderPlaced(userWA.Phone, invoiceUrl, userWA.Name, orderId)
 }
 
 //API GET PROFILE

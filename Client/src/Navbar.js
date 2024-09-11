@@ -9,16 +9,6 @@ import user from "./Images/userImg.png";
 import cart_icon from "./Images/Menu/icons8-cart-48.png";
 import dish from './Images/dish.png';
 function Navbar({ updateUser, inside }) {
-  const Logout = () => {
-    localStorage.removeItem("user");
-    const user = localStorage.getItem("user");
-    
-    if(typeof updateUser == "function"){
-    updateUser(user);
-    toast.success("Thanks for Visiting Menu");
-    }
-    else toast.error("Some Error");
-  };
   const userData = JSON.parse(localStorage.getItem("user"));
   return (
     <div className="navbar">

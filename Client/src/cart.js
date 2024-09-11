@@ -4,7 +4,6 @@ import "./Cart.css";
 import Footer from "./Footer";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Address from "./Address";
 //Images
 import user from "./Images/user.png";
 import cart from "./Images/Cart/Cart.svg";
@@ -148,7 +147,7 @@ function Cart({ updateUser }) {
 
               <img className="cart-img" src={cart} />
             </div>
-            <div className="card" style={{backgroundColor : "#f6f5f9"}}>
+            <div className="card" style={{backgroundColor : "#f6f5f9", width : '100%'}}>
               <DataTable value={data} tableStyle={{ maxWidth: "90%" }}>
                 <Column field="foodId" header="ID"></Column>
                 {/* <Column field="item" header="Item" body = {(prod) => {return <img src = {db[prod?.foodId - 1].url} className="listrow-img"/>}}></Column> */}

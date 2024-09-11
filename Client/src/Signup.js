@@ -30,6 +30,7 @@ function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(data);
     if (!data.name || !data.email || !data.password || !data?.phone) {
       toast.warning("Please Fill the Data");
     } else {

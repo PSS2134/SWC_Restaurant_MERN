@@ -114,6 +114,13 @@ th,td {
     font-size: 25px;
     
 }
+
+/* For DataTable */
+.p-datatable > .p-datatable-wrapper {
+    overflow: auto;
+    justify-content: center;
+    display: flex;
+}
 @media (max-width: 768px) {
     .list-header{
         display: none;

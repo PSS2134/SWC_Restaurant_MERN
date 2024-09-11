@@ -40,6 +40,7 @@ const User = ({ updateUser }) => {
   const Logout = () => {
     localStorage.removeItem("user");
     const user = localStorage.getItem("user");
+    localStorage.removeItem("address");
     toast.success("Thanks for Visiting Menu");
     updateUser(user);
   };
@@ -65,6 +66,8 @@ const User = ({ updateUser }) => {
         console.log(res1);
         setLoading(false);
         setAddressRes(res1.data);
+        const checkAddress = JSON.parse(localStorage.getItem("address"))
+        if(!checkAddress && res1.data && res1.data[0]) handleHomeAddress(res1.data[0], 0);
       });
   }, []);
   // console.log(order);
@@ -223,8 +226,13 @@ const User = ({ updateUser }) => {
 
     if (res.status == 200 && res.message == "Address Saved Successfully") {
       toast.success("Address Save Successfully");
-      if(address.length == 0) setAddress([res.data]);
+      console.log(addressRes, res.data)
+      if(addressRes &&  !addressRes?.length) {
+        setAddressRes([res.data]);
+        handleHomeAddress(res.data, 0);
+      }
       else setAddressRes((address => ([...address, res.data])))
+      
       setAddress({ address: "", landmark: "", pin: 0 });
       setVisible(false);
     }
