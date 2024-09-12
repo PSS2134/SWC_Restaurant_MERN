@@ -227,7 +227,7 @@ const User = ({ updateUser }) => {
     if (res.status == 200 && res.message == "Address Saved Successfully") {
       toast.success("Address Save Successfully");
       console.log(addressRes, res.data)
-      if(addressRes &&  !addressRes?.length) {
+      if(!addressRes || (addressRes &&  !addressRes?.length)) {
         setAddressRes([res.data]);
         handleHomeAddress(res.data, 0);
       }
