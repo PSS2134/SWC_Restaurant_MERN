@@ -4,8 +4,6 @@
 
 <p id="description">Taste Heaven your all-in-one restaurant service app offers seamless dining experiences. Explore our diverse menu place orders with ease and enjoy personalized service through user profiles with editable information and profile images. Keep track of your culinary journey with our comprehensive order history feature. Elevate your dining experience with Taste Heaven—where convenience meets culinary delight!</p>
 
-  ![Screenshot 2023-12-25 125313](https://github.com/PSS2134/TasteHeaven/assets/101321904/c6741e8f-a8ef-41da-a4e6-fb69f3948d43)
-
 <h2>Snaps</h2>
 <h4>Login</h4>
 
