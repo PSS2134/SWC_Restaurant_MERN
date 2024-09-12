@@ -6,18 +6,28 @@
 
   ![Screenshot 2023-12-25 125313](https://github.com/PSS2134/TasteHeaven/assets/101321904/c6741e8f-a8ef-41da-a4e6-fb69f3948d43)
 
-  
-<h2>🧐 Features</h2>
+<h2>Snaps</h2>
+<h4>Login</h4>
 
-Here're some of the project's best features:
+![Screenshot 2024-09-12 132905](https://github.com/user-attachments/assets/964bc9fb-9ade-483c-8bb1-f420ecfdcd9e)
 
-*   Food Menu Viewing
-*   Food Ordering
-*   User Profile
-*   Order History
-*   User Authentication
+<h4>Menu</h4>
+![Screenshot 2024-09-12 132948](https://github.com/user-attachments/assets/bb71e8db-29f0-4dd3-a39a-a41e3e2e2fc2)
+<h4>Cart</h4>
+![Screenshot 2024-09-12 134333](https://github.com/user-attachments/assets/8d67f8dc-0416-4919-a278-816a5964d05b)
 
-  
+<h4>Order</h4>
+![Screenshot 2024-09-12 134427](https://github.com/user-attachments/assets/90dd3215-cb4c-4902-b197-418a631995ba)
+
+<h4>Profile</h4>
+![Screenshot 2024-09-12 135047](https://github.com/user-attachments/assets/14e451f8-f87e-428d-87ef-03468ea1549b)
+![Screenshot 2024-09-12 134156](https://github.com/user-attachments/assets/a7e5194a-6b1b-4a07-a141-997f699f10d6)
+![Screenshot 2024-09-12 134305](https://github.com/user-attachments/assets/d368fffa-c094-44c7-9577-39e7a3a28057)
+
+<h4>Whatsapp Feature</h4>  
+![Screenshot 2024-09-12 140139](https://github.com/user-attachments/assets/b79f1142-769b-4513-801d-2556d65cdb89)
+![Screenshot 2024-09-12 140221](https://github.com/user-attachments/assets/33fc7924-7139-444e-ba0e-fca38e5844c1)
+
 <h2>💻 Built with</h2>
 
 Technologies used in the project:
