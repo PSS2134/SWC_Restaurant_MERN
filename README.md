@@ -25,4 +25,5 @@ Technologies used in the project:
 *   Golang
 *   Gorilla Mux
 *   MongoDB
+*   Whatsapp Business API
 *   Cloudinary
