@@ -17,8 +17,52 @@
 <h4>Whatsapp Feature</h4>  
 <p align="center"><img src="https://github.com/user-attachments/assets/b79f1142-769b-4513-801d-2556d65cdb89"></p>
 <p align="center"><img src="https://github.com/user-attachments/assets/33fc7924-7139-444e-ba0e-fca38e5844c1"></p>
-<h2>💻 Built with</h2>
 
+<h2>🛠️ Installation Steps:</h2>
+
+<p>1. Clone the repository</p>
+
+```
+git clone https://github.com/PSS2134/TasteHeaven_GO.git
+```
+
+<p>2. Now move into the **Client** folder</p>
+
+```
+cd Client 
+```
+
+<p>3. Install the dependencies</p>
+
+```
+npm install
+```
+
+<p>4. Now move into the **Server** folder</p>
+
+```
+cd Server
+```
+
+<p>5. Complete the .env file (PDFGEN_API_KEY could be found from pdfgen.app)</p>
+
+```
+MONGO_URI = "" WA_TOKEN = "" PDFGEN_API_KEY = "" 
+```
+
+<p>6. Run the backend in Server Folder</p>
+
+```
+go run main.go
+```
+
+<p>7. Run the React App in Client folder</p>
+
+```
+npm run start
+```
+
+<h2>💻 Built with</h2>
 Technologies used in the project:
 
 *   ReactJs
