@@ -1,6 +1,12 @@
 <h1 align="center" id="title">TasteHeaven GO</h1>
 <p id="description">TasteHeaven your all-in-one restaurant service app offers seamless dining experiences. Explore our diverse menu place orders with ease and enjoy personalized service through user profiles with editable information and profile images. Keep track of your culinary journey with our comprehensive order history feature. Elevate your dining experience with Taste Heaven—where convenience meets culinary delight!</p>
 
+<h2>📺 Demo</h2>
+
+https://github.com/user-attachments/assets/c081c9c5-d6d1-4f65-8fd4-15fcdc43edd8
+
+
+
 <h2>📷 Snaps</h2>
 <h3>Login</h3>
 <p align="center"><img src="https://github.com/user-attachments/assets/964bc9fb-9ade-483c-8bb1-f420ecfdcd9e"></p>
